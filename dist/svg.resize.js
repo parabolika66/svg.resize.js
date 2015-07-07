@@ -278,6 +278,7 @@
 
         // Calculate the new position and height / width of the element
         this.calc(diffX, diffY);
+        this.el.fire('resizing');
     };
 
     // Is called on mouseup.
