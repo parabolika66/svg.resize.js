@@ -1,7 +1,7 @@
 svg.resize.js
 =============
 
-An extension of [svg.js](https://github.com/wout/svg.js) which allows to resize elements which are selected with [svn.select.js](https://github.com/Fuzzyma/svg.select.js)
+An extension of [svg.js](https://github.com/wout/svg.js) which allows to resize elements and nested objects which are selected with [svn.select.js](https://github.com/Fuzzyma/svg.select.js)
 
 # Demo
 
@@ -45,4 +45,5 @@ Deactivate resizing
 
 # Events
 
+- `resizing`: Fired when resizing
 - `resizedone`: Fired when resizing is done
