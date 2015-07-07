@@ -84,11 +84,16 @@
         this.m = this.el.node.getScreenCTM().inverse();
         this.offset = { x: window.pageXOffset, y: window.pageYOffset };
 
+        var box = this.el.bbox();
+        if(this.el instanceof SVG.Nested) {
+            box = this.el.rbox();
+        }
+
         this.parameters = {
             p: this.transformPoint(event.detail.event.clientX,event.detail.event.clientY),
             x: event.detail.x,      // x-position of the mouse when resizing started
             y: event.detail.y,      // y-position of the mouse when resizing started
-            box: this.el.bbox(),    // The bounding-box of the element
+            box: box,               // The bounding-box of the element
             rotation: this.el.transform().rotation  // The current rotation of the element
         };
 
@@ -303,7 +308,7 @@
 
     };
 
-    SVG.extend(SVG.Element, {
+    SVG.extend(SVG.Element, SVG.Nested, {
         // Resize element with mouse
         resize: function (options) {
 
@@ -315,7 +320,7 @@
 
     });
 
-    SVG.Element.prototype.resize.defaults = {
+    SVG.Element.prototype.resize.defaults = SVG.Nested.prototype.resize.defaults = {
         snapToAngle: 0.1,    // Specifies the speed the rotation is happening when moving the mouse
         snapToGrid: 1        // Snaps to a grid of `snapToGrid` Pixels
     };
