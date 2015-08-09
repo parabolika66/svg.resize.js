@@ -10,7 +10,7 @@
         this.p = el.doc().node.createSVGPoint();
     }
 
-    ResizeHandler.prototype.transformPoint = function(x, y, m){
+    ResizeHandler.prototype.transformPoint = function (x, y, m) {
 
         this.p.x = x - (this.offset.x - window.pageXOffset);
         this.p.y = y - (this.offset.y - window.pageYOffset);
@@ -40,26 +40,46 @@
         }
 
         // We listen to all these events which are specifying different edges
-        this.el.on('lt.resize', function(e){ _this.resize(e || window.event); });  // Left-Top
-        this.el.on('rt.resize', function(e){ _this.resize(e || window.event); });  // Right-Top
-        this.el.on('rb.resize', function(e){ _this.resize(e || window.event); });  // Right-Bottom
-        this.el.on('lb.resize', function(e){ _this.resize(e || window.event); });  // Left-Bottom
+        this.el.on('lt.resize', function (e) {
+            _this.resize(e || window.event);
+        });  // Left-Top
+        this.el.on('rt.resize', function (e) {
+            _this.resize(e || window.event);
+        });  // Right-Top
+        this.el.on('rb.resize', function (e) {
+            _this.resize(e || window.event);
+        });  // Right-Bottom
+        this.el.on('lb.resize', function (e) {
+            _this.resize(e || window.event);
+        });  // Left-Bottom
 
-        this.el.on('t.resize', function(e){ _this.resize(e || window.event); });   // Top
-        this.el.on('r.resize', function(e){ _this.resize(e || window.event); });   // Right
-        this.el.on('b.resize', function(e){ _this.resize(e || window.event); });   // Bottom
-        this.el.on('l.resize', function(e){ _this.resize(e || window.event); });   // Left
+        this.el.on('t.resize', function (e) {
+            _this.resize(e || window.event);
+        });   // Top
+        this.el.on('r.resize', function (e) {
+            _this.resize(e || window.event);
+        });   // Right
+        this.el.on('b.resize', function (e) {
+            _this.resize(e || window.event);
+        });   // Bottom
+        this.el.on('l.resize', function (e) {
+            _this.resize(e || window.event);
+        });   // Left
 
-        this.el.on('rot.resize', function(e){ _this.resize(e || window.event); }); // Rotation
+        this.el.on('rot.resize', function (e) {
+            _this.resize(e || window.event);
+        }); // Rotation
 
-        this.el.on('point.resize', function(e){ _this.resize(e || window.event); }); // Point-Moving
+        this.el.on('point.resize', function (e) {
+            _this.resize(e || window.event);
+        }); // Point-Moving
 
         // This call ensures, that the plugin reacts to a change of snapToGrid immediately
         this.update();
 
     };
 
-    ResizeHandler.prototype.stop = function(){
+    ResizeHandler.prototype.stop = function () {
         this.el.off('lt.resize');
         this.el.off('rt.resize');
         this.el.off('rb.resize');
@@ -82,15 +102,22 @@
         var _this = this;
 
         this.m = this.el.node.getScreenCTM().inverse();
-        this.offset = { x: window.pageXOffset, y: window.pageYOffset };
+        this.offset = {x: window.pageXOffset, y: window.pageYOffset};
 
         var box = this.el.bbox();
-        if(this.el instanceof SVG.Nested) {
-            box = this.el.rbox();
+        if (this.el instanceof SVG.Nested) {
+            box = this.el.tbox();
+
+            if (!(box.x && box.y)) {
+                box.x = this.el.x();
+                box.y = this.el.y();
+                box.width = this.el.width();
+                box.height = this.el.height();
+            }
         }
 
         this.parameters = {
-            p: this.transformPoint(event.detail.event.clientX,event.detail.event.clientY),
+            p: this.transformPoint(event.detail.event.clientX, event.detail.event.clientY),
             x: event.detail.x,      // x-position of the mouse when resizing started
             y: event.detail.y,      // y-position of the mouse when resizing started
             box: box,               // The bounding-box of the element
@@ -214,7 +241,7 @@
 
                     // start minus middle
                     var sAngle = Math.atan2((this.parameters.p.y - this.parameters.box.y - this.parameters.box.height / 2), (this.parameters.p.x - this.parameters.box.x - this.parameters.box.width / 2));
-                    
+
                     // end minus middle
                     var pAngle = Math.atan2((current.y - this.parameters.box.y - this.parameters.box.height / 2), (current.x - this.parameters.box.x - this.parameters.box.width / 2));
 
@@ -247,13 +274,23 @@
         }
 
         // When resizing started, we have to register events for...
+        SVG.on(window, 'mousedown.resize', function () {
+            _this.start();
+        });
         SVG.on(window, 'mousemove.resize', function (e) {
             _this.update(e || window.event);
+
         });    // mousemove to keep track of the changes and...
         SVG.on(window, 'mouseup.resize', function () {
             _this.done();
         });        // mouseup to know when resizing stops
 
+    };
+
+    // Is called on mousedown.
+    // Fires an event
+    ResizeHandler.prototype.start = function () {
+        this.el.fire('resizestart');
     };
 
     // The update-function redraws the element every time the mouse is moving
@@ -282,6 +319,7 @@
     // Removes the update-function from the mousemove event
     ResizeHandler.prototype.done = function () {
         this.lastUpdateCall = null;
+        SVG.off(window, 'mousedown.resize');
         SVG.off(window, 'mousemove.resize');
         SVG.off(window, 'mouseup.resize');
         this.el.fire('resizedone');
